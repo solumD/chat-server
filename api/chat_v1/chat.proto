@@ -8,16 +8,17 @@ import "google/protobuf/empty.proto";
 option go_package = "github.com/solumD/chat-server/pkg/chat_v1;chat_v1";
 
 service ChatV1 {
-    rpc Create(CreateRequest) returns (CreateResponse);
-    rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
+    rpc DeleteChat(DeleteChatRequest) returns (google.protobuf.Empty);
     rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty);
 }
 
-message CreateRequest {
-    repeated string usernames = 1;
+message CreateChatRequest {
+    string name = 1;
+    repeated string usernames = 2;
 }
 
-message CreateResponse {
+message CreateChatResponse {
     int64 id = 1;
 }
 
@@ -27,7 +28,7 @@ message MessageInfo {
     google.protobuf.Timestamp timestamp = 3;
 }
 
-message DeleteRequest {
+message DeleteChatRequest {
     int64 id = 1;
 }
 
