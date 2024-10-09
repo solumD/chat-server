@@ -16,36 +16,6 @@ import (
 
 const grpcPort = 50052
 
-type server struct {
-	desc.UnimplementedChatV1Server
-}
-
-func (s *server) Create(_ context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	log.Printf("[Create] request data |\nusernames: %v",
-		req.GetUsernames(),
-	)
-
-	return &desc.CreateResponse{
-		Id: gofakeit.Int64(),
-	}, nil
-}
-
-func (s *server) Delete(_ context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
-	log.Printf("[Delete] request data |\nid: %v", req.Id)
-
-	return nil, nil
-}
-
-func (s *server) SendMessage(_ context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
-	log.Printf("[SendMessage] request data |\nfrom: %v, text: %v, timestamp: %v",
-		req.Info.From,
-		req.Info.Text,
-		req.Info.Timestamp,
-	)
-
-	return nil, nil
-}
-
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
@@ -61,4 +31,38 @@ func main() {
 	if err = s.Serve(lis); err != nil {
 		log.Fatalf("failed to serv: %s", err)
 	}
+}
+
+type server struct {
+	desc.UnimplementedChatV1Server
+}
+
+// CreateChat creates new chat with given name and users
+func (s *server) CreateChat(_ context.Context, req *desc.CreateChatRequest) (*desc.CreateChatResponse, error) {
+	log.Printf("[Create] request data |\nchat's name: %v,usernames: %v",
+		req.Name,
+		req.Usernames,
+	)
+
+	return &desc.CreateChatResponse{
+		Id: gofakeit.Int64(),
+	}, nil
+}
+
+// DeleteChat deletes chat by id
+func (s *server) DeleteChat(_ context.Context, req *desc.DeleteChatRequest) (*emptypb.Empty, error) {
+	log.Printf("[Delete] request data |\nid: %v", req.Id)
+
+	return nil, nil
+}
+
+// SendMessage sends message from on user to another
+func (s *server) SendMessage(_ context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
+	log.Printf("[SendMessage] request data |\nfrom: %v, text: %v, timestamp: %v",
+		req.Info.From,
+		req.Info.Text,
+		req.Info.Timestamp,
+	)
+
+	return nil, nil
 }
