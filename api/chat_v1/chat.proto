@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package chat_v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/solumD/chat-server/pkg/chat_v1;chat_v1";
+
+service ChatV1 {
+    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
+    rpc DeleteChat(DeleteChatRequest) returns (google.protobuf.Empty);
+    rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty);
+}
+
+message CreateChatRequest {
+    string name = 1;
+    repeated string usernames = 2;
+}
+
+message CreateChatResponse {
+    int64 id = 1;
+}
+
+message MessageInfo {
+    string from = 1;
+    string text = 2;
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message DeleteChatRequest {
+    int64 id = 1;
+}
+
+message SendMessageRequest {
+    MessageInfo info = 1;
+}
