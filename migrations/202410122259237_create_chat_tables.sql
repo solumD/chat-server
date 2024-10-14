@@ -2,7 +2,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
-    role INTEGER NOT NULL /* 0 - UNKNOWN, 1 - USER, 2 - ADMIN */
+    role INT DEFAULT 0      /* 0 - UNKNOWN, 1 - USER, 2 - ADMIN */
 );
 
 CREATE TABLE chats (
@@ -14,8 +14,8 @@ CREATE TABLE chats (
 
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    chat_id INTEGER REFERENCES chats(id),
-    from_id INTEGER REFERENCES users (id),
+    chat_id INT REFERENCES chats(id),
+    from_id INT REFERENCES users (id),
     message_text TEXT NOT NULL,
     sent_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
