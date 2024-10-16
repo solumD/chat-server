@@ -14,7 +14,7 @@ services:
       - "${PG_PORT}:5432"
     volumes:
       - postgres_volume:/var/lib/postgresql/data
-  
+
   migrator:
     build:
       context: .

@@ -1,12 +1,12 @@
 -- +goose Up
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    role INT DEFAULT 0      /* 0 - UNKNOWN, 1 - USER, 2 - ADMIN */
+    username VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE chats (
     id SERIAL PRIMARY KEY,
+    is_deleted INT NOT NULL DEFAULT 0,
     chat_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -20,10 +20,11 @@ CREATE TABLE users_in_chats (
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     chat_id INT REFERENCES chats(id),
-    from_id INT REFERENCES users (id),
+    user_id INT REFERENCES users(id),
     message_text TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 
 -- +goose Down
 DROP TABLE users;
