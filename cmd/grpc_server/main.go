@@ -219,8 +219,8 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 	}
 
 	row := s.pool.QueryRow(ctx, query, args...)
-	var is_deleted int
-	err = row.Scan(&is_deleted)
+	var isDeleted int
+	err = row.Scan(&isDeleted)
 	if err == pgx.ErrNoRows {
 		log.Printf("%s: chat %d not found", fn, req.Id) // чата с указанными id не найдено
 		return nil, fmt.Errorf("chat %d was not found ", req.Id)
@@ -230,7 +230,7 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 	}
 
 	// проверяем удален ли чат
-	if is_deleted == 1 {
+	if isDeleted == 1 {
 		log.Printf("%s: chat %d was deleted", fn, req.Id)
 		return nil, fmt.Errorf("chat %d was deleted", req.Id)
 	}
@@ -247,9 +247,9 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 		return nil, err
 	}
 
-	var userId int
+	var userID int
 	row = s.pool.QueryRow(ctx, query, args...)
-	err = row.Scan(&userId)
+	err = row.Scan(&userID)
 	if err == pgx.ErrNoRows {
 		log.Printf("%s: user %s doesn't exist", fn, req.From) // юзер не найден
 		return nil, fmt.Errorf("user %s doesn't exist", req.From)
@@ -262,7 +262,7 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 	query, args, err = sq.Select("").
 		From("users_in_chats").
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.And{sq.Eq{"chat_id": req.Id}, sq.Eq{"user_id": userId}}).
+		Where(sq.And{sq.Eq{"chat_id": req.Id}, sq.Eq{"user_id": userID}}).
 		ToSql()
 
 	if err != nil {
@@ -284,7 +284,7 @@ func (s *server) SendMessage(ctx context.Context, req *desc.SendMessageRequest) 
 	query, args, err = sq.Insert("messages").
 		PlaceholderFormat(sq.Dollar).
 		Columns("chat_id", "user_id", "message_text").
-		Values(req.Id, userId, req.Text).
+		Values(req.Id, userID, req.Text).
 		ToSql()
 
 	if err != nil {
