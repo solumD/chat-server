@@ -12,6 +12,7 @@ import (
 func (i *Implementation) DeleteChat(ctx context.Context, req *desc.DeleteChatRequest) (*emptypb.Empty, error) {
 	_, err := i.chatService.DeleteChat(ctx, req.GetId())
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 

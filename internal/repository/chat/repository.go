@@ -157,6 +157,7 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 		From(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{idColumn: chatID}).
+		Limit(1).
 		ToSql()
 
 	if err != nil {

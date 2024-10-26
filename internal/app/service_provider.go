@@ -24,9 +24,9 @@ type serviceProvider struct {
 	dbClient  db.Client
 	txManager db.TxManager
 
-	authRepository repository.ChatRepository
-	authService    service.ChatService
-	authImpl       *chatApi.Implementation
+	chatRepository repository.ChatRepository
+	chatService    service.ChatService
+	chatImpl       *chatApi.Implementation
 }
 
 // NewServiceProvider возвращает новый объект API слоя
@@ -88,25 +88,25 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 }
 
 func (s *serviceProvider) AuthReposistory(ctx context.Context) repository.ChatRepository {
-	if s.authRepository == nil {
-		s.authRepository = chatRepo.NewRepository(s.DBClient(ctx))
+	if s.chatRepository == nil {
+		s.chatRepository = chatRepo.NewRepository(s.DBClient(ctx))
 	}
 
-	return s.authRepository
+	return s.chatRepository
 }
 
 func (s *serviceProvider) AuthService(ctx context.Context) service.ChatService {
-	if s.authService == nil {
-		s.authService = chatSrv.NewService(s.AuthReposistory(ctx), s.TxManager(ctx))
+	if s.chatService == nil {
+		s.chatService = chatSrv.NewService(s.AuthReposistory(ctx), s.TxManager(ctx))
 	}
 
-	return s.authService
+	return s.chatService
 }
 
 func (s *serviceProvider) AuthImpl(ctx context.Context) *chatApi.Implementation {
-	if s.authImpl == nil {
-		s.authImpl = chatApi.NewImplementation(s.AuthService(ctx))
+	if s.chatImpl == nil {
+		s.chatImpl = chatApi.NewImplementation(s.AuthService(ctx))
 	}
 
-	return s.authImpl
+	return s.chatImpl
 }
