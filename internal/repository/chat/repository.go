@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 	"github.com/solumD/chat-server/internal/client/db"
+	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/repository"
-	"github.com/solumD/chat-server/internal/repository/chat/model"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -178,7 +178,7 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 	return &emptypb.Empty{}, nil
 }
 
-// SendMessage отправляет сообщение пользователя в чат
+// SendMessage отправляет (сохраняет) сообщение пользователя в чат
 func (r *repo) SendMessage(ctx context.Context, message model.Message) (*emptypb.Empty, error) {
 	// выбираем чат с указанным id
 	query, args, err := sq.Select(isDeletedColumn).

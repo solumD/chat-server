@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/solumD/chat-server/internal/repository/chat/model"
+	"github.com/solumD/chat-server/internal/model"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
