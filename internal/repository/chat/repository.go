@@ -6,8 +6,7 @@ import (
 	"log"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx"
-	"github.com/pkg/errors"
+	"github.com/jackc/pgx/v4"
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/repository"
@@ -45,7 +44,7 @@ func NewRepository(db db.Client) repository.ChatRepository {
 }
 
 // CreateChat создает чат
-func (r *repo) CreateChat(ctx context.Context, chat model.Chat) (int64, error) {
+func (r *repo) CreateChat(ctx context.Context, chat *model.Chat) (int64, error) {
 	// добавляем новый чат
 	query, args, err := sq.Insert(chatsTable).
 		PlaceholderFormat(sq.Dollar).
@@ -148,44 +147,16 @@ func (r *repo) CreateChat(ctx context.Context, chat model.Chat) (int64, error) {
 		}
 	}
 
-	log.Printf("created chat with name %s", chat.Name)
 	return chatID, nil
 }
 
 // DeleteChat удаляет чат по id
 func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, error) {
-	query, args, err := sq.Update(chatsTable).
-		PlaceholderFormat(sq.Dollar).
-		Set(isDeletedColumn, 1).
-		Where(sq.Eq{idColumn: chatID}).ToSql()
-
-	if err != nil {
-		return nil, err
-	}
-
-	q := db.Query{
-		Name:     "chat_repository.DeleteChat",
-		QueryRaw: query,
-	}
-
-	res, err := r.db.DB().ExecContext(ctx, q, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("updated %d rows", res.RowsAffected())
-
-	return &emptypb.Empty{}, nil
-}
-
-// SendMessage отправляет (сохраняет) сообщение пользователя в чат
-func (r *repo) SendMessage(ctx context.Context, message model.Message) (*emptypb.Empty, error) {
 	// выбираем чат с указанным id
 	query, args, err := sq.Select(isDeletedColumn).
 		From(chatsTable).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{idColumn: message.ChatID}).
-		GroupBy(idColumn).
+		Where(sq.Eq{idColumn: chatID}).
 		ToSql()
 
 	if err != nil {
@@ -200,7 +171,55 @@ func (r *repo) SendMessage(ctx context.Context, message model.Message) (*emptypb
 	var isDeleted int
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&isDeleted)
 	if err == pgx.ErrNoRows {
-		return nil, errors.Errorf("chat %d was not found ", message.ChatID) // чата с указанными id не найдено
+		return nil, fmt.Errorf("chat %d was not found ", chatID) // чата с указанными id не найдено
+	} else if err != nil {
+		return nil, err
+	}
+
+	query, args, err = sq.Update(chatsTable).
+		PlaceholderFormat(sq.Dollar).
+		Set(isDeletedColumn, 1).
+		Where(sq.Eq{idColumn: chatID}).ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q = db.Query{
+		Name:     "chat_repository.DeleteChat",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+// SendMessage отправляет (сохраняет) сообщение пользователя в чат
+func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
+	// выбираем чат с указанным id
+	query, args, err := sq.Select(isDeletedColumn).
+		From(chatsTable).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{idColumn: message.ChatID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "chat_repository.SendMessage",
+		QueryRaw: query,
+	}
+
+	var isDeleted int
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&isDeleted)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("chat %d was not found ", message.ChatID) // чата с указанными id не найдено
 	} else if err != nil {
 		return nil, err
 	}
@@ -229,7 +248,7 @@ func (r *repo) SendMessage(ctx context.Context, message model.Message) (*emptypb
 	var userID int
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
 	if err == pgx.ErrNoRows {
-		return nil, errors.Errorf("user %s doesn't exist", message.From) // юзер не найден
+		return nil, fmt.Errorf("user %s doesn't exist", message.From) // юзер не найден
 	} else if err != nil {
 		return nil, err
 	}
@@ -252,7 +271,7 @@ func (r *repo) SendMessage(ctx context.Context, message model.Message) (*emptypb
 
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan()
 	if err == pgx.ErrNoRows {
-		return nil, errors.Errorf("user %s doesn't exist in chat %d", message.From, message.ChatID) // юзер не состоит в указанном чате
+		return nil, fmt.Errorf("user %s doesn't exist in chat %d", message.From, message.ChatID) // юзер не состоит в указанном чате
 	} else if err != nil {
 		return nil, err
 	}

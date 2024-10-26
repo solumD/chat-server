@@ -6,7 +6,7 @@ import (
 	"github.com/solumD/chat-server/internal/model"
 )
 
-func (s *srv) CreateChat(ctx context.Context, chat model.Chat) (int64, error) {
+func (s *srv) CreateChat(ctx context.Context, chat *model.Chat) (int64, error) {
 	var chatID int64
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error

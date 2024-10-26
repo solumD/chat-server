@@ -5,7 +5,7 @@ import (
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 )
 
-// ToUserFromDesc конвертирует модель для создания чата API слоя в
+// ToChatFromDesc конвертирует модель для создания чата API слоя в
 // модель сервисного слоя
 func ToChatFromDesc(chat *desc.CreateChatRequest) *model.Chat {
 	return &model.Chat{
@@ -14,7 +14,7 @@ func ToChatFromDesc(chat *desc.CreateChatRequest) *model.Chat {
 	}
 }
 
-// ToUserFromDesc конвертирует модель сообщения API слоя в
+// ToMessageFromDesc конвертирует модель сообщения API слоя в
 // модель сервисного слоя
 func ToMessageFromDesc(message *desc.SendMessageRequest) *model.Message {
 	return &model.Message{

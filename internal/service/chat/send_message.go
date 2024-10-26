@@ -8,7 +8,7 @@ import (
 )
 
 // SendMessage отправляет запрос в репо слой на отправку (сохранение) сообщения
-func (s *srv) SendMessage(ctx context.Context, message model.Message) (*emptypb.Empty, error) {
+func (s *srv) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error
 		_, errTx = s.chatRepository.SendMessage(ctx, message)
@@ -23,5 +23,5 @@ func (s *srv) SendMessage(ctx context.Context, message model.Message) (*emptypb.
 		return nil, err
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
