@@ -9,8 +9,13 @@ import (
 )
 
 // CreateChat отправляет запрос в сервисный слой на создание чата
-func (i *Implementation) CreateChat(ctx context.Context, req *desc.CreateChatRequest) (*desc.CreateChatResponse, error) {
-	chatID, err := i.chatService.CreateChat(ctx, converter.ToChatFromDesc(req))
+func (i *API) CreateChat(ctx context.Context, req *desc.CreateChatRequest) (*desc.CreateChatResponse, error) {
+	convertedChat, err := converter.ToChatFromDesc(req)
+	if err != nil {
+		return nil, err
+	}
+
+	chatID, err := i.chatService.CreateChat(ctx, convertedChat)
 	if err != nil {
 		return nil, err
 	}

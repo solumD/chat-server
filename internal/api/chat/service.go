@@ -5,16 +5,16 @@ import (
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 )
 
-// Implementation сруктура с заглушками gRPC-методов (при их отсутствии) и
+// API сруктура с заглушками gRPC-методов (при их отсутствии) и
 // объект сервисного слоя (его интерфейса)
-type Implementation struct {
+type API struct {
 	desc.UnimplementedChatV1Server
 	chatService service.ChatService
 }
 
-// NewImplementation возвращает новый объект имплементации API-слоя
-func NewImplementation(chatService service.ChatService) *Implementation {
-	return &Implementation{
+// NewAPI возвращает новый объект имплементации API-слоя
+func NewAPI(chatService service.ChatService) *API {
+	return &API{
 		chatService: chatService,
 	}
 }

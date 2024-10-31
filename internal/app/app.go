@@ -8,6 +8,7 @@ import (
 	"github.com/solumD/chat-server/internal/closer"
 	"github.com/solumD/chat-server/internal/config"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -74,7 +75,7 @@ func (a *App) initGRPCServer(ctx context.Context) {
 
 	reflection.Register(a.grpcServer)
 
-	desc.RegisterChatV1Server(a.grpcServer, a.serviceProvider.AuthImpl(ctx))
+	desc.RegisterChatV1Server(a.grpcServer, a.serviceProvider.ChatAPI(ctx))
 
 }
 

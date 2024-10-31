@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4"
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/repository"
+
+	sq "github.com/Masterminds/squirrel"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -46,105 +46,30 @@ func NewRepository(db db.Client) repository.ChatRepository {
 // CreateChat создает чат
 func (r *repo) CreateChat(ctx context.Context, chat *model.Chat) (int64, error) {
 	// добавляем новый чат
-	query, args, err := sq.Insert(chatsTable).
-		PlaceholderFormat(sq.Dollar).
-		Columns(chatNameColumn).
-		Values(chat.Name).
-		Suffix("RETURNING id").
-		ToSql()
-
+	chatID, err := r.createChat(ctx, chat.Name)
 	if err != nil {
 		return 0, err
 	}
 
-	q := db.Query{
-		Name:     "chat_repository.CreateChat",
-		QueryRaw: query,
-	}
-
-	var chatID int64
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatID)
+	// разделяем полученных юзеров на существующих и несуществующих
+	userIDs, newUsers, err := r.divideUsers(ctx, chat.Usernames)
 	if err != nil {
 		return 0, err
-	}
-
-	userIDs := []int64{}   // существующие пользователи
-	newUsers := []string{} // новые пользователи (у них пока что нет id)
-
-	for _, user := range chat.Usernames {
-		query, args, err := sq.Select(idColumn).
-			From(usersTable).
-			PlaceholderFormat(sq.Dollar).
-			Where(sq.Eq{usernameColumn: user}).ToSql()
-
-		if err != nil {
-			return 0, err
-		}
-
-		q := db.Query{
-			Name:     "chat_repository.CreateChat",
-			QueryRaw: query,
-		}
-
-		var userID int64
-		err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
-		if err == pgx.ErrNoRows {
-			newUsers = append(newUsers, user) // сохраняем имя нового пользователя
-		} else if err != nil {
-			return 0, err
-		} else {
-			userIDs = append(userIDs, userID) // сохраняем id уже существующего пользователя
-		}
 	}
 
 	// добавляем новых пользователей и сохраняем их id
-	for _, name := range newUsers {
-		query, args, err := sq.Insert(usersTable).
-			PlaceholderFormat(sq.Dollar).
-			Columns(usernameColumn).
-			Values(name).
-			Suffix("RETURNING id").
-			ToSql()
-
-		if err != nil {
-			return 0, err
-		}
-
-		q := db.Query{
-			Name:     "chat_repository.CreateChat",
-			QueryRaw: query,
-		}
-
-		var newUserID int64
-		err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&newUserID)
-		if err != nil {
-			return 0, err
-		}
-
-		userIDs = append(userIDs, newUserID) // сохраняем id
+	newIDs, err := r.insertUsers(ctx, newUsers)
+	if err != nil {
+		return 0, err
 	}
 
-	// добавляем id чата и id всех его пользователей в таблицу users_in_chats
-	for _, userID := range userIDs {
-		query, args, err := sq.Insert(usersInChatsTable).
-			PlaceholderFormat(sq.Dollar).
-			Columns(chatIDColumn, userIDColumn).
-			Values(chatID, userID).
-			ToSql()
+	// добавляем новые id к существующим
+	userIDs = append(userIDs, newIDs...)
 
-		if err != nil {
-			return 0, err
-		}
-
-		q := db.Query{
-			Name:     "chat_repository.CreateChat",
-			QueryRaw: query,
-		}
-
-		_, err = r.db.DB().ExecContext(ctx, q, args...)
-		if err != nil {
-			return 0, err
-		}
+	// соотносим всех юзеров с id чата
+	err = r.insertUsersInChats(ctx, chatID, userIDs)
+	if err != nil {
+		return 0, err
 	}
 
 	return chatID, nil
@@ -152,32 +77,18 @@ func (r *repo) CreateChat(ctx context.Context, chat *model.Chat) (int64, error) 
 
 // DeleteChat удаляет чат по id
 func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, error) {
-	// выбираем чат с указанным id
-	query, args, err := sq.Select(isDeletedColumn).
-		From(chatsTable).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{idColumn: chatID}).
-		Limit(1).
-		ToSql()
-
+	// проверяем, существует ли чат с указанными id
+	exist, err := r.isChatExist(ctx, chatID)
 	if err != nil {
 		return nil, err
 	}
 
-	q := db.Query{
-		Name:     "chat_repository.SendMessage",
-		QueryRaw: query,
+	if !exist {
+		return nil, fmt.Errorf("chat %d doesn't exist", chatID)
 	}
 
-	var isDeleted int
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&isDeleted)
-	if err == pgx.ErrNoRows {
-		return nil, fmt.Errorf("chat %d was not found ", chatID) // чата с указанными id не найдено
-	} else if err != nil {
-		return nil, err
-	}
-
-	query, args, err = sq.Update(chatsTable).
+	// удаляем чат (меняем id_deleted на 1)
+	query, args, err := sq.Update(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Set(isDeletedColumn, 1).
 		Where(sq.Eq{idColumn: chatID}).ToSql()
@@ -186,7 +97,7 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 		return nil, err
 	}
 
-	q = db.Query{
+	q := db.Query{
 		Name:     "chat_repository.DeleteChat",
 		QueryRaw: query,
 	}
@@ -201,84 +112,40 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 
 // SendMessage отправляет (сохраняет) сообщение пользователя в чат
 func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
-	// выбираем чат с указанным id
-	query, args, err := sq.Select(isDeletedColumn).
-		From(chatsTable).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{idColumn: message.ChatID}).
-		ToSql()
-
+	// проверяем, удален ли чат
+	exist, err := r.isChatExist(ctx, message.ChatID)
 	if err != nil {
 		return nil, err
 	}
-
-	q := db.Query{
-		Name:     "chat_repository.SendMessage",
-		QueryRaw: query,
+	if !exist {
+		return nil, fmt.Errorf("chat %d doesn't exist", message.ChatID)
 	}
 
-	var isDeleted int
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&isDeleted)
-	if err == pgx.ErrNoRows {
-		return nil, fmt.Errorf("chat %d was not found ", message.ChatID) // чата с указанными id не найдено
-	} else if err != nil {
-		return nil, err
-	}
-
-	// проверяем удален ли чат
-	if isDeleted == 1 {
-		return nil, fmt.Errorf("chat %d was deleted", message.ChatID)
-	}
-
-	// выбираем id юзера с указанными именем
-	query, args, err = sq.Select(idColumn).
-		From(usersTable).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{usernameColumn: message.From}).
-		ToSql()
-
+	// проверяем, существует ли юзер
+	exist, err = r.isUserExistByName(ctx, message.From)
 	if err != nil {
 		return nil, err
 	}
-
-	q = db.Query{
-		Name:     "chat_repository.SendMessage",
-		QueryRaw: query,
-	}
-
-	var userID int
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
-	if err == pgx.ErrNoRows {
+	if !exist {
 		return nil, fmt.Errorf("user %s doesn't exist", message.From) // юзер не найден
-	} else if err != nil {
+	}
+
+	userID, err := r.getUserByName(ctx, message.From)
+	if err != nil {
 		return nil, err
 	}
 
 	// проверяем, состоит ли юзер в указанном чате
-	query, args, err = sq.Select("").
-		From(usersInChatsTable).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.And{sq.Eq{chatIDColumn: message.ChatID}, sq.Eq{userIDColumn: userID}}).
-		ToSql()
-
+	inChat, err := r.isUserInChat(ctx, message.ChatID, userID)
 	if err != nil {
 		return nil, err
 	}
-
-	q = db.Query{
-		Name:     "chat_repository.SendMessage",
-		QueryRaw: query,
-	}
-
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan()
-	if err == pgx.ErrNoRows {
-		return nil, fmt.Errorf("user %s doesn't exist in chat %d", message.From, message.ChatID) // юзер не состоит в указанном чате
-	} else if err != nil {
-		return nil, err
+	if !inChat {
+		return nil, fmt.Errorf("user %v not in chat %d", message.From, message.ChatID)
 	}
 
 	// после всех проверок сохраняем сообщение юзера
-	query, args, err = sq.Insert(messagesTable).
+	query, args, err := sq.Insert(messagesTable).
 		PlaceholderFormat(sq.Dollar).
 		Columns(chatIDColumn, userIDColumn, messageTextColumn).
 		Values(message.ChatID, userID, message.Text).
@@ -288,7 +155,7 @@ func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptyp
 		return nil, err
 	}
 
-	q = db.Query{
+	q := db.Query{
 		Name:     "chat_repository.SendMessage",
 		QueryRaw: query,
 	}

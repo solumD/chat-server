@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	chatApi "github.com/solumD/chat-server/internal/api/chat"
+	api "github.com/solumD/chat-server/internal/api/chat"
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/client/db/pg"
 	"github.com/solumD/chat-server/internal/client/db/transaction"
@@ -16,7 +16,7 @@ import (
 	chatSrv "github.com/solumD/chat-server/internal/service/chat"
 )
 
-// Структура API слоя
+// Структура приложения со всеми зависимостями
 type serviceProvider struct {
 	pgConfig   config.PGConfig
 	grpcConfig config.GRPCConfig
@@ -26,7 +26,7 @@ type serviceProvider struct {
 
 	chatRepository repository.ChatRepository
 	chatService    service.ChatService
-	chatImpl       *chatApi.Implementation
+	chatImpl       *api.API
 }
 
 // NewServiceProvider возвращает новый объект API слоя
@@ -34,6 +34,7 @@ func NewServiceProvider() *serviceProvider {
 	return &serviceProvider{}
 }
 
+// PGConfig инициализирует конфиг postgres
 func (s *serviceProvider) PGConfig() config.PGConfig {
 	if s.pgConfig == nil {
 		cfg, err := config.NewPGConfig()
@@ -47,6 +48,7 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	return s.pgConfig
 }
 
+// GRPCConfig инициализирует конфиг grpc
 func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
@@ -60,6 +62,7 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	return s.grpcConfig
 }
 
+// DBClient инициализирует клиент базы данных
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if s.dbClient == nil {
 		cl, err := pg.New(ctx, s.PGConfig().DSN())
@@ -79,6 +82,7 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return s.dbClient
 }
 
+// TxManager инициализирует менеджер транзакций
 func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	if s.txManager == nil {
 		s.txManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
@@ -87,7 +91,8 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	return s.txManager
 }
 
-func (s *serviceProvider) AuthReposistory(ctx context.Context) repository.ChatRepository {
+// ChatRepository инициализирует репо слой
+func (s *serviceProvider) ChatReposistory(ctx context.Context) repository.ChatRepository {
 	if s.chatRepository == nil {
 		s.chatRepository = chatRepo.NewRepository(s.DBClient(ctx))
 	}
@@ -95,17 +100,19 @@ func (s *serviceProvider) AuthReposistory(ctx context.Context) repository.ChatRe
 	return s.chatRepository
 }
 
-func (s *serviceProvider) AuthService(ctx context.Context) service.ChatService {
+// ChatService иницилизирует сервисный слой
+func (s *serviceProvider) ChatService(ctx context.Context) service.ChatService {
 	if s.chatService == nil {
-		s.chatService = chatSrv.NewService(s.AuthReposistory(ctx), s.TxManager(ctx))
+		s.chatService = chatSrv.NewService(s.ChatReposistory(ctx), s.TxManager(ctx))
 	}
 
 	return s.chatService
 }
 
-func (s *serviceProvider) AuthImpl(ctx context.Context) *chatApi.Implementation {
+// ChatAPI инициализирует api слой
+func (s *serviceProvider) ChatAPI(ctx context.Context) *api.API {
 	if s.chatImpl == nil {
-		s.chatImpl = chatApi.NewImplementation(s.AuthService(ctx))
+		s.chatImpl = api.NewAPI(s.ChatService(ctx))
 	}
 
 	return s.chatImpl

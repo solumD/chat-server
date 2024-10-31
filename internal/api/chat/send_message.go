@@ -6,12 +6,17 @@ import (
 
 	"github.com/solumD/chat-server/internal/converter"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
+
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // SendMessage отправляет запрос в сервисный слой на отправку (сохранение) сообщения
-func (i *Implementation) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
-	_, err := i.chatService.SendMessage(ctx, converter.ToMessageFromDesc(req))
+func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
+	convertedMessage, err := converter.ToMessageFromDesc(req)
+	if err != nil {
+		return nil, err
+	}
+	_, err = i.chatService.SendMessage(ctx, convertedMessage)
 	if err != nil {
 		return nil, err
 	}
