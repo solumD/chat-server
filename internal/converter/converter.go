@@ -9,15 +9,15 @@ import (
 )
 
 var (
-	errDescChatIsNil    = fmt.Errorf("desc chat is nil")
-	errDescMessageIsNil = fmt.Errorf("desc message is nil")
+	ErrDescChatIsNil    = fmt.Errorf("desc chat is nil")
+	ErrDescMessageIsNil = fmt.Errorf("desc message is nil")
 )
 
 // ToChatFromDesc конвертирует модель для создания чата API слоя в
 // модель сервисного слоя
 func ToChatFromDesc(chat *desc.CreateChatRequest) (*model.Chat, error) {
 	if chat == nil {
-		return nil, fmt.Errorf("convertion failed: %v", errDescChatIsNil)
+		return nil, ErrDescChatIsNil
 	}
 
 	return &model.Chat{
@@ -30,7 +30,7 @@ func ToChatFromDesc(chat *desc.CreateChatRequest) (*model.Chat, error) {
 // модель сервисного слоя
 func ToMessageFromDesc(message *desc.SendMessageRequest) (*model.Message, error) {
 	if message == nil {
-		return nil, fmt.Errorf("convertion failed: %v", errDescMessageIsNil)
+		return nil, ErrDescMessageIsNil
 	}
 
 	return &model.Message{
