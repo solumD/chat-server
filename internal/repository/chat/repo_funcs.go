@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/solumD/chat-server/internal/client/db"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
-	"github.com/solumD/chat-server/internal/client/db"
 )
 
 // createChat сохраняет чат в БД

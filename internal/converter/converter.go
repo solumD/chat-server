@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/solumD/chat-server/internal/model"
+
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 )
 

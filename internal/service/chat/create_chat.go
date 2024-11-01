@@ -7,6 +7,7 @@ import (
 	"github.com/solumD/chat-server/internal/model"
 )
 
+// CreateChat отправляет запрос в репо слой на создание чата
 func (s *srv) CreateChat(ctx context.Context, chat *model.Chat) (int64, error) {
 	if len(chat.Name) == 0 {
 		return 0, fmt.Errorf("chat's name can't be empty")
