@@ -11,11 +11,11 @@ import (
 	"github.com/solumD/chat-server/internal/service"
 	serviceMocks "github.com/solumD/chat-server/internal/service/mocks"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func TestSendMessage(t *testing.T) {

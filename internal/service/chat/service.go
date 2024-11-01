@@ -20,3 +20,19 @@ func NewService(chatRepository repository.ChatRepository, txManager db.TxManager
 		txManager:      txManager,
 	}
 }
+
+// NewMockService возвращает объект мока сервисного слоя
+func NewMockService(deps ...interface{}) service.ChatService {
+	serv := srv{}
+
+	for _, v := range deps {
+		switch s := v.(type) {
+		case repository.ChatRepository:
+			serv.chatRepository = s
+		case db.TxManager:
+			serv.txManager = s
+		}
+	}
+
+	return &serv
+}

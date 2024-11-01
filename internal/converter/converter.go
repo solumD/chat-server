@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrDescChatIsNil    = fmt.Errorf("desc chat is nil")
-	ErrDescMessageIsNil = fmt.Errorf("desc message is nil")
+	ErrDescChatIsNil    = fmt.Errorf("desc chat is nil")    // ErrDescChatIsNil ошибка, если chat пришел nil
+	ErrDescMessageIsNil = fmt.Errorf("desc message is nil") // ErrDescMessageIsNil ошибка, если message пришел nil
 )
 
 // ToChatFromDesc конвертирует модель для создания чата API слоя в
