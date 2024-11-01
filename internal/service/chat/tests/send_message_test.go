@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v7"
-	"github.com/gojuno/minimock/v3"
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/client/db/mocks"
 	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/repository"
 	repoMocks "github.com/solumD/chat-server/internal/repository/mocks"
 	"github.com/solumD/chat-server/internal/service/chat"
+
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
