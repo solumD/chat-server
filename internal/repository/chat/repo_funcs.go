@@ -138,7 +138,7 @@ func (r *repo) insertUsersInChats(ctx context.Context, chatID int64, userIDs []i
 // isChatExist проверяет, существует ли в БД чат с указанным id
 func (r *repo) isChatExist(ctx context.Context, chatID int64) (bool, error) {
 	// выбираем чат с указанным id
-	query, args, err := sq.Select(isDeletedColumn).
+	query, args, err := sq.Select("1").
 		From(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{idColumn: chatID}).
@@ -173,7 +173,7 @@ func (r *repo) isChatExist(ctx context.Context, chatID int64) (bool, error) {
 
 // isUserExistByName проверяет, существует ли в БД пользователь с указанными именем
 func (r *repo) isUserExistByName(ctx context.Context, name string) (bool, error) {
-	query, args, err := sq.Select(idColumn).
+	query, args, err := sq.Select("1").
 		From(usersTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{usernameColumn: name}).
@@ -228,7 +228,7 @@ func (r *repo) getUserByName(ctx context.Context, name string) (int64, error) {
 
 // isUserInChat проверяет, находится ли юзер в указанном чате
 func (r *repo) isUserInChat(ctx context.Context, chatID int64, userID int64) (bool, error) {
-	query, args, err := sq.Select("").
+	query, args, err := sq.Select("1").
 		From(usersInChatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.And{sq.Eq{chatIDColumn: chatID}, sq.Eq{userIDColumn: userID}}).

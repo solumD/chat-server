@@ -1,41 +1,34 @@
 package converter
 
 import (
-	"fmt"
-
 	"github.com/solumD/chat-server/internal/model"
 
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 )
 
-var (
-	errDescChatIsNil    = fmt.Errorf("desc chat is nil")
-	errDescMessageIsNil = fmt.Errorf("desc message is nil")
-)
-
 // ToChatFromDesc конвертирует модель для создания чата API слоя в
 // модель сервисного слоя
-func ToChatFromDesc(chat *desc.CreateChatRequest) (*model.Chat, error) {
+func ToChatFromDesc(chat *desc.CreateChatRequest) *model.Chat {
 	if chat == nil {
-		return nil, fmt.Errorf("convertion failed: %v", errDescChatIsNil)
+		return nil
 	}
 
 	return &model.Chat{
 		Name:      chat.Name,
 		Usernames: chat.Usernames,
-	}, nil
+	}
 }
 
 // ToMessageFromDesc конвертирует модель сообщения API слоя в
 // модель сервисного слоя
-func ToMessageFromDesc(message *desc.SendMessageRequest) (*model.Message, error) {
+func ToMessageFromDesc(message *desc.SendMessageRequest) *model.Message {
 	if message == nil {
-		return nil, fmt.Errorf("convertion failed: %v", errDescMessageIsNil)
+		return nil
 	}
 
 	return &model.Message{
 		ChatID: message.Id,
 		From:   message.From,
 		Text:   message.Text,
-	}, nil
+	}
 }
