@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/solumD/chat-server/internal/api/chat"
-	"github.com/solumD/chat-server/internal/converter"
+	"github.com/solumD/chat-server/internal/api/chat/errors"
 	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/service"
 	serviceMocks "github.com/solumD/chat-server/internal/service/mocks"
@@ -95,7 +95,7 @@ func TestCreateChat(t *testing.T) {
 				req: nil,
 			},
 			want: nil,
-			err:  converter.ErrDescChatIsNil,
+			err:  errors.ErrDescChatIsNil,
 			chatServiceMock: func(mc *minimock.Controller) service.ChatService {
 				mock := serviceMocks.NewChatServiceMock(mc)
 				return mock

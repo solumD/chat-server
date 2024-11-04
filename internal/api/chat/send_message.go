@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/solumD/chat-server/internal/api/chat/errors"
 	"github.com/solumD/chat-server/internal/converter"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 
@@ -12,11 +13,11 @@ import (
 
 // SendMessage отправляет запрос в сервисный слой на отправку (сохранение) сообщения
 func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
-	convertedMessage, err := converter.ToMessageFromDesc(req)
-	if err != nil {
-		return nil, err
+	convertedMessage := converter.ToMessageFromDesc(req)
+	if convertedMessage == nil {
+		return nil, errors.ErrDescMessageIsNil
 	}
-	_, err = i.chatService.SendMessage(ctx, convertedMessage)
+	_, err := i.chatService.SendMessage(ctx, convertedMessage)
 	if err != nil {
 		return nil, err
 	}
