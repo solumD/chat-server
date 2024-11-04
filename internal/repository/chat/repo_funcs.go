@@ -138,7 +138,7 @@ func (r *repo) insertUsersInChats(ctx context.Context, chatID int64, userIDs []i
 // isChatExist проверяет, существует ли в БД чат с указанным id
 func (r *repo) isChatExist(ctx context.Context, chatID int64) (bool, error) {
 	// выбираем чат с указанным id
-	query, args, err := sq.Select("1").
+	query, args, err := sq.Select(isDeletedColumn).
 		From(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{idColumn: chatID}).
@@ -188,8 +188,8 @@ func (r *repo) isUserExistByName(ctx context.Context, name string) (bool, error)
 		QueryRaw: query,
 	}
 
-	var userID int
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&userID)
+	var one int
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&one)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
@@ -243,7 +243,8 @@ func (r *repo) isUserInChat(ctx context.Context, chatID int64, userID int64) (bo
 		QueryRaw: query,
 	}
 
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan()
+	var one int
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&one)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
