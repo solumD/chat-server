@@ -23,8 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatV1Client interface {
+	// Создает новый чат
 	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
+	// Удаляет чат по id
 	DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Отправляет сообщение в чат
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -67,8 +70,11 @@ func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, 
 // All implementations must embed UnimplementedChatV1Server
 // for forward compatibility
 type ChatV1Server interface {
+	// Создает новый чат
 	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
+	// Удаляет чат по id
 	DeleteChat(context.Context, *DeleteChatRequest) (*emptypb.Empty, error)
+	// Отправляет сообщение в чат
 	SendMessage(context.Context, *SendMessageRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedChatV1Server()
 }

@@ -2,19 +2,64 @@ syntax = "proto3";
 
 package chat_v1;
 
+import "validate/validate.proto";
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto"; 
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/solumD/chat-server/pkg/chat_v1;chat_v1";
 
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Chat API"
+        version: "1.0.0"
+        contact: {
+            name: "Dmitry Kononov"
+            email: "dkononov-work@yandex.ru"
+        };
+    };
+
+    host: "localhost:8081",
+    schemes: HTTP,
+    schemes: HTTPS,
+    consumes: "application/json",
+    produces: "application/json",
+};
+
 service ChatV1 {
-    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
-    rpc DeleteChat(DeleteChatRequest) returns (google.protobuf.Empty);
-    rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty);
+    // Создает новый чат
+    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse){
+        option (google.api.http) = {
+            post: "/chat/v1/create"
+            body: "*"
+        };
+    }
+
+    // Удаляет чат по id
+    rpc DeleteChat(DeleteChatRequest) returns (google.protobuf.Empty){
+        option (google.api.http) = {
+            delete: "/chat/v1/delete"
+        };
+    }
+
+    // Отправляет сообщение в чат
+    rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty){
+        option (google.api.http) = {
+            post: "/chat/v1/send_message"
+            body: "*"
+        };
+    }
 }
 
 message CreateChatRequest {
-    string name = 1;
-    repeated string usernames = 2;
+    string name = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    repeated string usernames = 2 [(validate.rules).repeated = {
+        items: {
+            string: {
+                pattern: "^[a-zA-Z0-9]+$"
+            }
+        }
+    }];
 }
 
 message CreateChatResponse {
@@ -27,6 +72,6 @@ message DeleteChatRequest {
 
 message SendMessageRequest {
     int64 id = 1;
-    string from = 2;
-    string text = 3;
+    string from = 2 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string text = 3 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
 }
