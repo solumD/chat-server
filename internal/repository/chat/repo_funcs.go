@@ -138,7 +138,7 @@ func (r *repo) insertUsersInChats(ctx context.Context, chatID int64, userIDs []i
 // isChatExist проверяет, существует ли в БД чат с указанным id
 func (r *repo) isChatExist(ctx context.Context, chatID int64) (bool, error) {
 	// выбираем чат с указанным id
-	query, args, err := sq.Select("1").
+	query, args, err := sq.Select(isDeletedColumn).
 		From(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{idColumn: chatID}).

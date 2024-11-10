@@ -68,22 +68,6 @@ func (m *CreateChatRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	for idx, item := range m.GetUsernames() {
-		_, _ = idx, item
-
-		if !_CreateChatRequest_Usernames_Pattern.MatchString(item) {
-			err := CreateChatRequestValidationError{
-				field:  fmt.Sprintf("Usernames[%v]", idx),
-				reason: "value does not match regex pattern \"^[a-zA-Z0-9]+$\"",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
-	}
-
 	if len(errors) > 0 {
 		return CreateChatRequestMultiError(errors)
 	}
@@ -165,8 +149,6 @@ var _ interface {
 } = CreateChatRequestValidationError{}
 
 var _CreateChatRequest_Name_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
-
-var _CreateChatRequest_Usernames_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 // Validate checks the field values on CreateChatResponse with the rules
 // defined in the proto definition for this message. If any rules are

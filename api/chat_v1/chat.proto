@@ -53,13 +53,7 @@ service ChatV1 {
 
 message CreateChatRequest {
     string name = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
-    repeated string usernames = 2 [(validate.rules).repeated = {
-        items: {
-            string: {
-                pattern: "^[a-zA-Z0-9]+$"
-            }
-        }
-    }];
+    repeated string usernames = 2;
 }
 
 message CreateChatResponse {
