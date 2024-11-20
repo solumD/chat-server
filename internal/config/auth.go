@@ -16,7 +16,7 @@ type authConfig struct {
 	port string
 }
 
-// NewAuthonfig returns new auth client config
+// NewAuthConfig returns new auth client config
 func NewAuthConfig() (AuthConfig, error) {
 	host := os.Getenv(authGrpcHostEnvName)
 	if len(host) == 0 {
