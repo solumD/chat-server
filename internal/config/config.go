@@ -27,6 +27,7 @@ type SwaggerConfig interface {
 // AuthConfig интерфейс конфига клиента auth
 type AuthConfig interface {
 	Address() string
+	CertPath() string
 }
 
 // Load reads ,env file from path and loads
