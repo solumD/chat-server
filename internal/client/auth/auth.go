@@ -2,7 +2,8 @@ package auth
 
 import "context"
 
-type AuthClient interface {
+// Client интерфейс клиента auth
+type Client interface {
 	Check(ctx context.Context, endpoint string) error
 }
 
