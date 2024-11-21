@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"sync"
 
-	grpcMW "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/solumD/chat-server/internal/closer"
 	"github.com/solumD/chat-server/internal/config"
 	"github.com/solumD/chat-server/internal/interceptor"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 	_ "github.com/solumD/chat-server/statik" //
 
+	grpcMW "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
