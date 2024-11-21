@@ -12,21 +12,18 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/georgysavva/scany v1.2.2
 	github.com/gojuno/minimock/v3 v3.4.1
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/rakyll/statik v0.1.7
+	github.com/solumD/auth v0.0.0-20241121111616-95b6b5d31eea
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38
 )
 
-require (
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
-	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	github.com/solumD/auth v0.0.0-20241121111616-95b6b5d31eea // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require gopkg.in/yaml.v3 v3.0.1 // indirect
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
