@@ -22,7 +22,9 @@ require (
 )
 
 require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
+	github.com/solumD/auth v0.0.0-20241121111616-95b6b5d31eea // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

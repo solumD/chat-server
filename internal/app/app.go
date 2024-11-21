@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"sync"
 
+	grpcMW "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/solumD/chat-server/internal/closer"
 	"github.com/solumD/chat-server/internal/config"
+	"github.com/solumD/chat-server/internal/interceptor"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 	_ "github.com/solumD/chat-server/statik" //
 
@@ -134,7 +136,14 @@ func (a *App) initGRPCServer(ctx context.Context) {
 		log.Fatalf("failed to load TLS keys: %v", err)
 	}
 
-	a.grpcServer = grpc.NewServer(grpc.Creds(creds))
+	a.grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpcMW.ChainUnaryServer(
+				interceptor.ValidateInterceptor,
+				interceptor.NewAuthInterceptor(a.serviceProvider.AuthClient(ctx)).Get()),
+		),
+		grpc.Creds(creds),
+	)
 
 	reflection.Register(a.grpcServer)
 
