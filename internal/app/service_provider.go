@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/solumD/auth/pkg/access_v1"
 	api "github.com/solumD/chat-server/internal/api/chat"
+	"github.com/solumD/chat-server/internal/client/auth"
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/client/db/pg"
 	"github.com/solumD/chat-server/internal/client/db/transaction"
@@ -14,6 +16,8 @@ import (
 	chatRepo "github.com/solumD/chat-server/internal/repository/chat"
 	"github.com/solumD/chat-server/internal/service"
 	chatSrv "github.com/solumD/chat-server/internal/service/chat"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // Структура приложения со всеми зависимостями
@@ -22,9 +26,11 @@ type serviceProvider struct {
 	grpcConfig    config.GRPCConfig
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
+	authConfig    config.AuthConfig
 
-	dbClient  db.Client
-	txManager db.TxManager
+	dbClient   db.Client
+	txManager  db.TxManager
+	authClient auth.Client
 
 	chatRepository repository.ChatRepository
 	chatService    service.ChatService
@@ -92,6 +98,20 @@ func (s *serviceProvider) SwaggerConfig() config.HTTPConfig {
 	return s.swaggerConfig
 }
 
+// AuthConfig инициализирует конфиг auth клиента
+func (s *serviceProvider) AuthConfig() config.AuthConfig {
+	if s.authConfig == nil {
+		cfg, err := config.NewAuthConfig()
+		if err != nil {
+			log.Fatalf("failed to get auth config")
+		}
+
+		s.authConfig = cfg
+	}
+
+	return s.authConfig
+}
+
 // DBClient инициализирует клиент базы данных
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if s.dbClient == nil {
@@ -110,6 +130,27 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	}
 
 	return s.dbClient
+}
+
+func (s *serviceProvider) AuthClient(ctx context.Context) auth.Client {
+	if s.authClient == nil {
+		creds, err := credentials.NewClientTLSFromFile(s.AuthConfig().CertPath(), "")
+		if err != nil {
+			log.Fatalf("could not process credentials: %v", err)
+		}
+
+		conn, err := grpc.DialContext(ctx, s.AuthConfig().Address(), grpc.WithTransportCredentials(creds))
+		if err != nil {
+			log.Fatalf("failed to connect to %s: %v", s.AuthConfig().Address(), err)
+		}
+
+		closer.Add(conn.Close)
+
+		client := access_v1.NewAccessV1Client(conn)
+		s.authClient = auth.New(client)
+	}
+
+	return s.authClient
 }
 
 // TxManager инициализирует менеджер транзакций

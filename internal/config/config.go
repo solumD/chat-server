@@ -24,6 +24,12 @@ type SwaggerConfig interface {
 	Address() string
 }
 
+// AuthConfig интерфейс конфига клиента auth
+type AuthConfig interface {
+	Address() string
+	CertPath() string
+}
+
 // Load reads ,env file from path and loads
 // variables into a project
 func Load(path string) error {

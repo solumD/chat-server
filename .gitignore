@@ -1,3 +1,5 @@
 .idea
-/bin//coverage.out
+/bin
 /coverage.out
+/tls/
+/vendor.protogen

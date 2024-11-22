@@ -10,18 +10,28 @@ import (
 
 	"github.com/solumD/chat-server/internal/closer"
 	"github.com/solumD/chat-server/internal/config"
+	"github.com/solumD/chat-server/internal/interceptor"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 	_ "github.com/solumD/chat-server/statik" //
 
+	grpcMW "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
-const configPath = ".env"
+const (
+	configPath = ".env"
+)
+
+var (
+	corsAllowedMethods = []string{"GET", "POST", "DELETE", "OPTIONS"}
+	corsAllowedHeaders = []string{"Accept", "Content-Type", "Content-Length", "Authorization"}
+)
 
 // App структура приложения
 type App struct {
@@ -121,7 +131,19 @@ func (a *App) initServiceProvider() {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) {
-	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+	creds, err := credentials.NewServerTLSFromFile("./tls/service/service.pem", "./tls/service/service.key")
+	if err != nil {
+		log.Fatalf("failed to load TLS keys: %v", err)
+	}
+
+	a.grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpcMW.ChainUnaryServer(
+				interceptor.ValidateInterceptor,
+				interceptor.NewAuthInterceptor(a.serviceProvider.AuthClient(ctx)).Get()),
+		),
+		grpc.Creds(creds),
+	)
 
 	reflection.Register(a.grpcServer)
 
@@ -143,8 +165,8 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
+		AllowedMethods:   corsAllowedMethods,
+		AllowedHeaders:   corsAllowedHeaders,
 		AllowCredentials: true,
 	})
 
