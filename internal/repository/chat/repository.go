@@ -3,7 +3,6 @@ package chat
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/model"
@@ -160,12 +159,10 @@ func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptyp
 		QueryRaw: query,
 	}
 
-	res, err := r.db.DB().ExecContext(ctx, q, args...)
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("inserted %d message", res.RowsAffected())
 
 	return &emptypb.Empty{}, nil
 }

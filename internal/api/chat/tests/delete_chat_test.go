@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/solumD/chat-server/internal/api/chat"
+	"github.com/solumD/chat-server/internal/logger"
 	"github.com/solumD/chat-server/internal/service"
 	serviceMocks "github.com/solumD/chat-server/internal/service/mocks"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
@@ -92,6 +93,8 @@ func TestDeleteChat(t *testing.T) {
 			},
 		},
 	}
+
+	logger.MockInit()
 
 	for _, tt := range tests {
 		tt := tt

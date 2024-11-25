@@ -7,6 +7,7 @@ import (
 
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/client/db/mocks"
+	"github.com/solumD/chat-server/internal/logger"
 	"github.com/solumD/chat-server/internal/model"
 	"github.com/solumD/chat-server/internal/repository"
 	repoMocks "github.com/solumD/chat-server/internal/repository/mocks"
@@ -119,6 +120,8 @@ func TestCreateChat(t *testing.T) {
 			},
 		},
 	}
+
+	logger.MockInit()
 
 	for _, tt := range tests {
 		tt := tt

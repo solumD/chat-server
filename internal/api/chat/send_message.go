@@ -2,12 +2,13 @@ package chat
 
 import (
 	"context"
-	"log"
 
 	"github.com/solumD/chat-server/internal/api/chat/errors"
 	"github.com/solumD/chat-server/internal/converter"
+	"github.com/solumD/chat-server/internal/logger"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -22,7 +23,7 @@ func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*e
 		return nil, err
 	}
 
-	log.Printf("sent message in chat %d", req.GetId())
+	logger.Info("sent message in chat", zap.Int64("chatID", req.GetId()))
 
 	return &emptypb.Empty{}, nil
 }
