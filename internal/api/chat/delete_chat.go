@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/solumD/chat-server/internal/logger"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -21,7 +23,7 @@ func (i *API) DeleteChat(ctx context.Context, req *desc.DeleteChatRequest) (*emp
 		return nil, err
 	}
 
-	log.Printf("deleted chat with id %d", req.GetId())
+	logger.Info("deleted chat", zap.Int64("chatID", req.GetId()))
 
 	return &emptypb.Empty{}, nil
 }

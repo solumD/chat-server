@@ -16,6 +16,7 @@ import (
 	chatRepo "github.com/solumD/chat-server/internal/repository/chat"
 	"github.com/solumD/chat-server/internal/service"
 	chatSrv "github.com/solumD/chat-server/internal/service/chat"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -27,6 +28,7 @@ type serviceProvider struct {
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
 	authConfig    config.AuthConfig
+	loggerConfig  config.LoggerConfig
 
 	dbClient   db.Client
 	txManager  db.TxManager
@@ -68,6 +70,20 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	}
 
 	return s.grpcConfig
+}
+
+// LoggerConfig инициализирует конфиг логгера
+func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
+	if s.loggerConfig == nil {
+		cfg, err := config.NewLoggerConfig()
+		if err != nil {
+			log.Fatalf("failed to get logger config:%v", err)
+		}
+
+		s.loggerConfig = cfg
+	}
+
+	return s.loggerConfig
 }
 
 // HTTPConfig ининициализирует конфиг http сервера

@@ -2,11 +2,13 @@ package chat
 
 import (
 	"context"
-	"log"
 
 	"github.com/solumD/chat-server/internal/api/chat/errors"
 	"github.com/solumD/chat-server/internal/converter"
+	"github.com/solumD/chat-server/internal/logger"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
+
+	"go.uber.org/zap"
 )
 
 // CreateChat отправляет запрос в сервисный слой на создание чата
@@ -21,7 +23,7 @@ func (i *API) CreateChat(ctx context.Context, req *desc.CreateChatRequest) (*des
 		return nil, err
 	}
 
-	log.Printf("inserted chat with id %d", chatID)
+	logger.Info("inserted chat", zap.Int64("chatID", chatID))
 
 	return &desc.CreateChatResponse{
 		Id: chatID,

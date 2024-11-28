@@ -23,7 +23,10 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38
 )
 
-require gopkg.in/yaml.v3 v3.0.1 // indirect
+require (
+	go.uber.org/multierr v1.10.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -42,8 +45,10 @@ require (
 require (
 	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.11.1
+	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.19.0 // indirect

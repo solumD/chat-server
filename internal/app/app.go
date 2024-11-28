@@ -11,6 +11,7 @@ import (
 	"github.com/solumD/chat-server/internal/closer"
 	"github.com/solumD/chat-server/internal/config"
 	"github.com/solumD/chat-server/internal/interceptor"
+	"github.com/solumD/chat-server/internal/logger"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
 	_ "github.com/solumD/chat-server/statik" //
 
@@ -136,9 +137,12 @@ func (a *App) initGRPCServer(ctx context.Context) {
 		log.Fatalf("failed to load TLS keys: %v", err)
 	}
 
+	logger.Init(logger.GetCore(logger.GetAtomicLevel(a.serviceProvider.LoggerConfig().Level())))
+
 	a.grpcServer = grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpcMW.ChainUnaryServer(
+				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
 				interceptor.NewAuthInterceptor(a.serviceProvider.AuthClient(ctx)).Get()),
 		),
