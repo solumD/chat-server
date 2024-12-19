@@ -49,6 +49,13 @@ service ChatV1 {
             body: "*"
         };
     }
+
+    rpc ConnectChat(ConnectChatRequest) returns (stream Message) {
+        option (google.api.http) = {
+            post: "/chat/v1/connect"
+            body: "*"
+        };
+    }
 }
 
 message CreateChatRequest {
@@ -67,5 +74,15 @@ message DeleteChatRequest {
 message SendMessageRequest {
     int64 id = 1;
     string from = 2 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
-    string text = 3 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string text = 3;
+}
+
+message ConnectChatRequest {
+    int64 id = 1;
+    string username = 2; 
+}
+
+message Message {
+    string from = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string text = 2;
 }

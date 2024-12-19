@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/solumD/chat-server/internal/client/auth"
+	"github.com/solumD/chat-server/internal/logger"
+	"go.uber.org/zap"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -28,6 +31,7 @@ func (i *authInterceptor) Get() grpc.UnaryServerInterceptor {
 		}
 
 		if err = i.authClient.Check(ctx, info.FullMethod); err != nil {
+			logger.Error("auth interceptor error", zap.Error(err))
 			return nil, err
 		}
 
