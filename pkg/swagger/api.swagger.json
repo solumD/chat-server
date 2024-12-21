@@ -25,6 +25,47 @@
     "application/json"
   ],
   "paths": {
+    "/chat/v1/connect": {
+      "post": {
+        "operationId": "ChatV1_ConnectChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/chat_v1Message"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of chat_v1Message"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/chat_v1ConnectChatRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ChatV1"
+        ]
+      }
+    },
     "/chat/v1/create": {
       "post": {
         "summary": "Создает новый чат",
@@ -127,6 +168,18 @@
     }
   },
   "definitions": {
+    "chat_v1ConnectChatRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
     "chat_v1CreateChatRequest": {
       "type": "object",
       "properties": {
@@ -147,6 +200,17 @@
         "id": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "chat_v1Message": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
         }
       }
     },

@@ -1,9 +1,12 @@
 package chat
 
 import (
+	"sync"
+
 	"github.com/solumD/chat-server/internal/client/db"
 	"github.com/solumD/chat-server/internal/repository"
 	"github.com/solumD/chat-server/internal/service"
+	"github.com/solumD/chat-server/pkg/chat_v1"
 )
 
 // Структура сервисного слоя с объектами репо слоя
@@ -11,6 +14,10 @@ import (
 type srv struct {
 	chatRepository repository.ChatRepository
 	txManager      db.TxManager
+
+	chatStreams map[int64]map[string]chat_v1.ChatV1_ConnectChatServer
+	msgChans    map[int64]chan *chat_v1.Message
+	mu          *sync.RWMutex
 }
 
 // NewService возвращает объект сервисного слоя
@@ -18,6 +25,9 @@ func NewService(chatRepository repository.ChatRepository, txManager db.TxManager
 	return &srv{
 		chatRepository: chatRepository,
 		txManager:      txManager,
+		chatStreams:    make(map[int64]map[string]chat_v1.ChatV1_ConnectChatServer),
+		msgChans:       make(map[int64]chan *chat_v1.Message),
+		mu:             &sync.RWMutex{},
 	}
 }
 

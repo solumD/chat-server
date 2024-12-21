@@ -166,3 +166,32 @@ func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptyp
 
 	return &emptypb.Empty{}, nil
 }
+
+func (r *repo) CheckChat(ctx context.Context, chatID int64, username string) error {
+	// проверяем, удален ли чат
+	exist, err := r.isChatExist(ctx, chatID)
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		return fmt.Errorf("chat %d doesn't exist", chatID)
+	}
+
+	userID, err := r.getUserByName(ctx, username)
+	if err != nil {
+		return err
+	}
+
+	// проверяем, состоит ли юзер в указанном чате
+	inChat, err := r.isUserInChat(ctx, chatID, userID)
+	if err != nil {
+		return err
+	}
+
+	if !inChat {
+		return fmt.Errorf("user %v not in chat %d", username, chatID)
+	}
+
+	return nil
+}

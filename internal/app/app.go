@@ -144,7 +144,8 @@ func (a *App) initGRPCServer(ctx context.Context) {
 			grpcMW.ChainUnaryServer(
 				interceptor.LogInterceptor,
 				interceptor.ValidateInterceptor,
-				interceptor.NewAuthInterceptor(a.serviceProvider.AuthClient(ctx)).Get()),
+				//interceptor.NewAuthInterceptor(a.serviceProvider.AuthClient(ctx)).Get(),
+			),
 		),
 		grpc.Creds(creds),
 	)
