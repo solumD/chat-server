@@ -64,6 +64,7 @@ func (r *repo) divideUsers(ctx context.Context, names []string) ([]int64, []stri
 				newUsers = append(newUsers, user) // сохраняем имя нового пользователя
 				continue
 			}
+
 			return nil, nil, err
 		}
 
@@ -194,6 +195,7 @@ func (r *repo) isUserExistByName(ctx context.Context, name string) (bool, error)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
 		}
+
 		return false, err
 	}
 
@@ -249,6 +251,7 @@ func (r *repo) isUserInChat(ctx context.Context, chatID int64, userID int64) (bo
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil
 		}
+
 		return false, err
 	}
 
