@@ -26,6 +26,7 @@ func (s *srv) ConnectChat(ctx context.Context, chatID int64, username string,
 	})
 
 	if err != nil {
+		logger.Error("failed to connect user to chat", zap.Error(err))
 		return err
 	}
 
