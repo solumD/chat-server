@@ -59,7 +59,7 @@ service ChatV1 {
 }
 
 message CreateChatRequest {
-    string name = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string name = 1;
     repeated string usernames = 2;
 }
 

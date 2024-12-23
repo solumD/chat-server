@@ -57,16 +57,7 @@ func (m *CreateChatRequest) validate(all bool) error {
 
 	var errors []error
 
-	if !_CreateChatRequest_Name_Pattern.MatchString(m.GetName()) {
-		err := CreateChatRequestValidationError{
-			field:  "Name",
-			reason: "value does not match regex pattern \"^[a-zA-Z0-9]+$\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Name
 
 	if len(errors) > 0 {
 		return CreateChatRequestMultiError(errors)
@@ -147,8 +138,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreateChatRequestValidationError{}
-
-var _CreateChatRequest_Name_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 // Validate checks the field values on CreateChatResponse with the rules
 // defined in the proto definition for this message. If any rules are

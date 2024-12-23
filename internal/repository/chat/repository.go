@@ -86,7 +86,7 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 		return nil, fmt.Errorf("chat %d doesn't exist", chatID)
 	}
 
-	// удаляем чат (меняем id_deleted на 1)
+	// удаляем чат (меняем is_deleted на 1)
 	query, args, err := sq.Update(chatsTable).
 		PlaceholderFormat(sq.Dollar).
 		Set(isDeletedColumn, 1).
