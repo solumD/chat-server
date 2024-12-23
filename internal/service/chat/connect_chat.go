@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"strings"
 
 	"github.com/solumD/chat-server/internal/logger"
 	"github.com/solumD/chat-server/pkg/chat_v1"
@@ -14,6 +15,8 @@ func (s *srv) ConnectChat(ctx context.Context, chatID int64, username string,
 	stream chat_v1.ChatV1_ConnectChatServer,
 ) error {
 	logger.Info("connecting user to chat", zap.Int64("chatID", chatID), zap.String("username", username))
+
+	username = strings.TrimSpace(username)
 
 	// проверка, что чат есть в базе, а пользователь в нем состоит
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
