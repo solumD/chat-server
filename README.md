@@ -4,5 +4,5 @@ gRPC-сервис чата, который используется консол
 Для клиента также написан gRPC-сервис аутентификации и авторизации: [auth](https://github.com/solumD/auth).
 
 ### Технологии, использованные в chat-server:
-gRPC, Postgres, Goose, Zap, Swagger, Prometheus
+gRPC, Postgres, Goose, Zap, Swagger
 
