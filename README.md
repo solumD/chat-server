@@ -1,3 +1,8 @@
 # chat-server
+gRPC-сервис чата, который используется консольным клиентом: [chat-client](https://github.com/solumD/chat-client).
 
-Проект в рамках курса по разработке микросервисов от [Олега Козырева](https://www.linkedin.com/in/olezhek28/)
+Для клиента также написан gRPC-сервис аутентификации и авторизации: [auth](https://github.com/solumD/auth).
+
+### Технологии, использованные в chat-server:
+gRPC, Postgres, Goose, Zap, Swagger, Prometheus
+
