@@ -91,6 +91,36 @@
         ]
       }
     },
+    "/chat/v1/get_user_chats": {
+      "get": {
+        "operationId": "ChatV1_GetUserChats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chat_v1GetUserChatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ChatV1"
+        ]
+      }
+    },
     "/chat/v1/send_message": {
       "post": {
         "summary": "Отправляет сообщение в чат",
@@ -127,6 +157,24 @@
     }
   },
   "definitions": {
+    "chat_v1ChatInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "usernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "chat_v1CreateChatRequest": {
       "type": "object",
       "properties": {
@@ -147,6 +195,18 @@
         "id": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "chat_v1GetUserChatsResponse": {
+      "type": "object",
+      "properties": {
+        "chats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/chat_v1ChatInfo"
+          }
         }
       }
     },

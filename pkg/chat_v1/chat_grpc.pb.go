@@ -27,6 +27,7 @@ type ChatV1Client interface {
 	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
 	// Удаляет чат по id
 	DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetUserChats(ctx context.Context, in *GetUserChatsRequest, opts ...grpc.CallOption) (*GetUserChatsResponse, error)
 	// Отправляет сообщение в чат
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -57,6 +58,15 @@ func (c *chatV1Client) DeleteChat(ctx context.Context, in *DeleteChatRequest, op
 	return out, nil
 }
 
+func (c *chatV1Client) GetUserChats(ctx context.Context, in *GetUserChatsRequest, opts ...grpc.CallOption) (*GetUserChatsResponse, error) {
+	out := new(GetUserChatsResponse)
+	err := c.cc.Invoke(ctx, "/chat_v1.ChatV1/GetUserChats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/chat_v1.ChatV1/SendMessage", in, out, opts...)
@@ -74,6 +84,7 @@ type ChatV1Server interface {
 	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
 	// Удаляет чат по id
 	DeleteChat(context.Context, *DeleteChatRequest) (*emptypb.Empty, error)
+	GetUserChats(context.Context, *GetUserChatsRequest) (*GetUserChatsResponse, error)
 	// Отправляет сообщение в чат
 	SendMessage(context.Context, *SendMessageRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedChatV1Server()
@@ -88,6 +99,9 @@ func (UnimplementedChatV1Server) CreateChat(context.Context, *CreateChatRequest)
 }
 func (UnimplementedChatV1Server) DeleteChat(context.Context, *DeleteChatRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteChat not implemented")
+}
+func (UnimplementedChatV1Server) GetUserChats(context.Context, *GetUserChatsRequest) (*GetUserChatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserChats not implemented")
 }
 func (UnimplementedChatV1Server) SendMessage(context.Context, *SendMessageRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
@@ -141,6 +155,24 @@ func _ChatV1_DeleteChat_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatV1_GetUserChats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserChatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatV1Server).GetUserChats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat_v1.ChatV1/GetUserChats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatV1Server).GetUserChats(ctx, req.(*GetUserChatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ChatV1_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendMessageRequest)
 	if err := dec(in); err != nil {
@@ -173,6 +205,10 @@ var ChatV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteChat",
 			Handler:    _ChatV1_DeleteChat_Handler,
+		},
+		{
+			MethodName: "GetUserChats",
+			Handler:    _ChatV1_GetUserChats_Handler,
 		},
 		{
 			MethodName: "SendMessage",

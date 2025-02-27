@@ -42,6 +42,12 @@ service ChatV1 {
         };
     }
 
+    rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse) {
+        option (google.api.http) = {
+            get: "/chat/v1/get_user_chats"
+        };
+    }
+
     // Отправляет сообщение в чат
     rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty){
         option (google.api.http) = {
