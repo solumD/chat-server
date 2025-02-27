@@ -1,8 +1,18 @@
 package chat
 
 import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/solumD/chat-server/internal/api/chat/errors"
+	"github.com/solumD/chat-server/internal/converter"
+	"github.com/solumD/chat-server/internal/logger"
 	"github.com/solumD/chat-server/internal/service"
 	desc "github.com/solumD/chat-server/pkg/chat_v1"
+	"google.golang.org/protobuf/types/known/emptypb"
+
+	"go.uber.org/zap"
 )
 
 // API сруктура с заглушками gRPC-методов (при их отсутствии) и
@@ -17,4 +27,55 @@ func NewAPI(chatService service.ChatService) *API {
 	return &API{
 		chatService: chatService,
 	}
+}
+
+// CreateChat отправляет запрос в сервисный слой на создание чата
+func (i *API) CreateChat(ctx context.Context, req *desc.CreateChatRequest) (*desc.CreateChatResponse, error) {
+	convertedChat := converter.ToChatFromDesc(req)
+	if convertedChat == nil {
+		return nil, errors.ErrDescChatIsNil
+	}
+
+	chatID, err := i.chatService.CreateChat(ctx, convertedChat)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("inserted chat", zap.Int64("chatID", chatID))
+
+	return &desc.CreateChatResponse{
+		Id: chatID,
+	}, nil
+}
+
+// DeleteChat отправляет запрос на удаление чата в сервисный слой
+func (i *API) DeleteChat(ctx context.Context, req *desc.DeleteChatRequest) (*emptypb.Empty, error) {
+	if req == nil {
+		return nil, fmt.Errorf("req is nil")
+	}
+	_, err := i.chatService.DeleteChat(ctx, req.GetId())
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	logger.Info("deleted chat", zap.Int64("chatID", req.GetId()))
+
+	return &emptypb.Empty{}, nil
+}
+
+// SendMessage отправляет запрос в сервисный слой на отправку (сохранение) сообщения
+func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
+	convertedMessage := converter.ToMessageFromDesc(req)
+	if convertedMessage == nil {
+		return nil, errors.ErrDescMessageIsNil
+	}
+	_, err := i.chatService.SendMessage(ctx, convertedMessage)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("sent message in chat", zap.Int64("chatID", req.GetId()))
+
+	return &emptypb.Empty{}, nil
 }

@@ -69,3 +69,17 @@ message SendMessageRequest {
     string from = 2 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
     string text = 3 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
 }
+
+message GetUserChatsRequest {
+    string username = 1;
+}
+
+message GetUserChatsResponse {
+    repeated ChatInfo chats = 1;;
+}
+
+message ChatInfo {
+    int64 id = 1;
+    string name = 2;
+    repeated string usernames = 3;
+}
