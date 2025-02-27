@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/solumD/chat-server/internal/client/db"
+	"github.com/solumD/chat-server/internal/model"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
@@ -201,7 +202,7 @@ func (r *repo) isUserExistByName(ctx context.Context, name string) (bool, error)
 }
 
 // getUserByName получает из БД id юзера с указанными именем
-func (r *repo) getUserByName(ctx context.Context, name string) (int64, error) {
+func (r *repo) getUserIDByName(ctx context.Context, name string) (int64, error) {
 	query, args, err := sq.Select(idColumn).
 		From(usersTable).
 		PlaceholderFormat(sq.Dollar).
@@ -224,6 +225,32 @@ func (r *repo) getUserByName(ctx context.Context, name string) (int64, error) {
 	}
 
 	return userID, nil
+}
+
+// getUserNameByID получает из БД имя юзера по указанному id
+func (r *repo) getUserNameByID(ctx context.Context, userID int64) (string, error) {
+	query, args, err := sq.Select(usernameColumn).
+		From(usersTable).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{idColumn: userID}).
+		ToSql()
+
+	if err != nil {
+		return "", err
+	}
+
+	q := db.Query{
+		Name:     "chat_repository.getUserNameByID",
+		QueryRaw: query,
+	}
+
+	var username string
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&username)
+	if err != nil {
+		return "", err
+	}
+
+	return username, nil
 }
 
 // isUserInChat проверяет, находится ли юзер в указанном чате
@@ -253,4 +280,125 @@ func (r *repo) isUserInChat(ctx context.Context, chatID int64, userID int64) (bo
 	}
 
 	return true, nil
+}
+
+// getUserChatsIDs выбирает id тех чатов, в которых состоит юзер
+func (r *repo) getUserChatsIDs(ctx context.Context, userID int64) ([]int64, error) {
+	query, args, err := sq.Select(chatIDColumn).
+		From(usersInChatsTable).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{userIDColumn: userID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "chat_repository.getUserChatsIDs",
+		QueryRaw: query,
+	}
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	chatIDs := []int64{}
+	for rows.Next() {
+		var id int64
+		rows.Scan(&id)
+		chatIDs = append(chatIDs, id)
+	}
+
+	return chatIDs, nil
+}
+
+func (r *repo) getChatUsersIDs(ctx context.Context, chatID int64) ([]int64, error) {
+	query, args, err := sq.Select(userIDColumn).
+		From(usersInChatsTable).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{chatIDColumn: chatID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "chat_repository.getChatUsersIDs",
+		QueryRaw: query,
+	}
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	userIDs := []int64{}
+	for rows.Next() {
+		var id int64
+		rows.Scan(&id)
+		userIDs = append(userIDs, id)
+	}
+
+	return userIDs, nil
+}
+
+func (r *repo) getChatsInfo(ctx context.Context, chatIDs []int64) ([]*model.Chat, error) {
+	chatsInfo := []*model.Chat{}
+
+	for _, id := range chatIDs {
+		exist, err := r.isChatExist(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+
+		if !exist {
+			continue
+		}
+
+		query, args, err := sq.Select(idColumn, chatNameColumn).
+			From(chatsTable).
+			PlaceholderFormat(sq.Dollar).
+			Where(sq.Eq{idColumn: id}).ToSql()
+
+		if err != nil {
+			return nil, err
+		}
+
+		q := db.Query{
+			Name:     "chat_repository.getChatsInfo",
+			QueryRaw: query,
+		}
+
+		chatInfo := &model.Chat{}
+		err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&chatInfo.ID, &chatInfo.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		userIDs, err := r.getChatUsersIDs(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+
+		usernames := []string{}
+		for _, id := range userIDs {
+			username, err := r.getUserNameByID(ctx, id)
+			if err != nil {
+				return nil, err
+			}
+
+			usernames = append(usernames, username)
+		}
+
+		chatInfo.Usernames = usernames
+
+		chatsInfo = append(chatsInfo, chatInfo)
+	}
+
+	return chatsInfo, nil
 }

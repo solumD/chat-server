@@ -86,6 +86,25 @@ func (s *srv) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, err
 	return &emptypb.Empty{}, nil
 }
 
+func (s *srv) GetUserChats(ctx context.Context, username string) ([]*model.Chat, error) {
+	var chatsInfo []*model.Chat
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var errTx error
+		chatsInfo, errTx = s.chatRepository.GetUserChats(ctx, username)
+		if errTx != nil {
+			return errTx
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return chatsInfo, nil
+}
+
 // SendMessage отправляет запрос в репо слой на отправку (сохранение) сообщения
 func (s *srv) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
 	if len(message.From) == 0 {

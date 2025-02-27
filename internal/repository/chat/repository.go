@@ -109,6 +109,39 @@ func (r *repo) DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, er
 	return &emptypb.Empty{}, nil
 }
 
+// GetUserChats выбирает список чатов юзера и информацию о них
+func (r *repo) GetUserChats(ctx context.Context, username string) ([]*model.Chat, error) {
+	// проверяем, существует ли юзер
+	exist, err := r.isUserExistByName(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		return nil, fmt.Errorf("user %s doesn't exist", username) // юзер не найден
+	}
+
+	userID, err := r.getUserIDByName(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	chatIDs, err := r.getUserChatsIDs(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(chatIDs) == 0 {
+		return nil, fmt.Errorf("user %s is not a member of any chat", username)
+	}
+
+	chatsInfo, err := r.getChatsInfo(ctx, chatIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return chatsInfo, nil
+}
+
 // SendMessage отправляет (сохраняет) сообщение пользователя в чат
 func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
 	// проверяем, удален ли чат
@@ -129,7 +162,7 @@ func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptyp
 		return nil, fmt.Errorf("user %s doesn't exist", message.From) // юзер не найден
 	}
 
-	userID, err := r.getUserByName(ctx, message.From)
+	userID, err := r.getUserIDByName(ctx, message.From)
 	if err != nil {
 		return nil, err
 	}

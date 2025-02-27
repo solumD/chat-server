@@ -12,5 +12,6 @@ import (
 type ChatRepository interface {
 	CreateChat(ctx context.Context, chat *model.Chat) (int64, error)
 	DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, error)
+	GetUserChats(ctx context.Context, username string) ([]*model.Chat, error)
 	SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error)
 }

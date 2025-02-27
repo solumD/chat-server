@@ -32,3 +32,23 @@ func ToMessageFromDesc(message *desc.SendMessageRequest) *model.Message {
 		Text:   message.Text,
 	}
 }
+
+// ToDescChatInfoFromService конвертирует модель списка информации о чатах из
+// сервисного слоя в модель API слоя
+func ToDescChatInfoFromService(chatsInfo []*model.Chat) []*desc.ChatInfo {
+	if chatsInfo == nil {
+		return nil
+	}
+
+	descChatsInfo := []*desc.ChatInfo{}
+	for _, c := range chatsInfo {
+		ci := &desc.ChatInfo{}
+		ci.Id = c.ID
+		ci.Name = c.Name
+		ci.Usernames = c.Usernames
+
+		descChatsInfo = append(descChatsInfo, ci)
+	}
+
+	return descChatsInfo
+}

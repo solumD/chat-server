@@ -64,6 +64,24 @@ func (i *API) DeleteChat(ctx context.Context, req *desc.DeleteChatRequest) (*emp
 	return &emptypb.Empty{}, nil
 }
 
+func (i *API) GetUserChats(ctx context.Context, req *desc.GetUserChatsRequest) (*desc.GetUserChatsResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("req is nil")
+	}
+
+	chatsInfo, err := i.chatService.GetUserChats(ctx, req.GetUsername())
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+
+	logger.Info("got user's chats", zap.String("username", req.GetUsername()), zap.Any("chatsInfo", chatsInfo))
+
+	return &desc.GetUserChatsResponse{
+		Chats: converter.ToDescChatInfoFromService(chatsInfo),
+	}, nil
+}
+
 // SendMessage отправляет запрос в сервисный слой на отправку (сохранение) сообщения
 func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
 	convertedMessage := converter.ToMessageFromDesc(req)
