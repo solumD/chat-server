@@ -48,6 +48,13 @@ service ChatV1 {
         };
     }
 
+    rpc ConnectChat(ConnectChatRequest) returns (stream Message) {
+        option (google.api.http) = {
+            post: "/chat/v1/connect"
+            body: "*"
+        };
+    }
+
     // Отправляет сообщение в чат
     rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty){
         option (google.api.http) = {
@@ -68,6 +75,16 @@ message CreateChatResponse {
 
 message DeleteChatRequest {
     int64 id = 1;
+}
+
+message ConnectChatRequest {
+    int64 id = 1;
+    string username = 2; 
+}
+
+message Message {
+    string from = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string text = 2;
 }
 
 message SendMessageRequest {

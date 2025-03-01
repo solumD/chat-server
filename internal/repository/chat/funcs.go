@@ -214,7 +214,7 @@ func (r *repo) getUserIDByName(ctx context.Context, name string) (int64, error) 
 	}
 
 	q := db.Query{
-		Name:     "chat_repository.getUserByName",
+		Name:     "chat_repository.getUserIDByName",
 		QueryRaw: query,
 	}
 

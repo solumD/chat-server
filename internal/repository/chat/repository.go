@@ -142,6 +142,35 @@ func (r *repo) GetUserChats(ctx context.Context, username string) ([]*model.Chat
 	return chatsInfo, nil
 }
 
+func (r *repo) CheckChat(ctx context.Context, chatID int64, username string) error {
+	// проверяем, удален ли чат
+	exist, err := r.isChatExist(ctx, chatID)
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		return fmt.Errorf("chat %d doesn't exist", chatID)
+	}
+
+	userID, err := r.getUserIDByName(ctx, username)
+	if err != nil {
+		return err
+	}
+
+	// проверяем, состоит ли юзер в указанном чате
+	inChat, err := r.isUserInChat(ctx, chatID, userID)
+	if err != nil {
+		return err
+	}
+
+	if !inChat {
+		return fmt.Errorf("user %v not in chat %d", username, chatID)
+	}
+
+	return nil
+}
+
 // SendMessage отправляет (сохраняет) сообщение пользователя в чат
 func (r *repo) SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error) {
 	// проверяем, удален ли чат

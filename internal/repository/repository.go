@@ -14,4 +14,5 @@ type ChatRepository interface {
 	DeleteChat(ctx context.Context, chatID int64) (*emptypb.Empty, error)
 	GetUserChats(ctx context.Context, username string) ([]*model.Chat, error)
 	SendMessage(ctx context.Context, message *model.Message) (*emptypb.Empty, error)
+	CheckChat(ctx context.Context, chatID int64, username string) error
 }
