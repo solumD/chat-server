@@ -82,6 +82,18 @@ func (i *API) GetUserChats(ctx context.Context, req *desc.GetUserChatsRequest) (
 	}, nil
 }
 
+// ConnectChat подключает юзера к чату и возвращает stream сообщений
+func (i *API) ConnectChat(req *desc.ConnectChatRequest,
+	stream desc.ChatV1_ConnectChatServer) error {
+
+	err := i.chatService.ConnectChat(stream.Context(), req.GetId(), req.GetUsername(), stream)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SendMessage отправляет запрос в сервисный слой на отправку (сохранение) сообщения
 func (i *API) SendMessage(ctx context.Context, req *desc.SendMessageRequest) (*emptypb.Empty, error) {
 	convertedMessage := converter.ToMessageFromDesc(req)
