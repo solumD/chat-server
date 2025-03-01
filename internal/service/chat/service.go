@@ -192,6 +192,7 @@ func (s *srv) SendMessage(ctx context.Context, message *model.Message) (*emptypb
 	if len(message.From) == 0 {
 		return nil, fmt.Errorf("from can't be empty")
 	}
+
 	if len(message.Text) == 0 {
 		return nil, fmt.Errorf("message's text can't be empty")
 	}

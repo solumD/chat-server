@@ -485,16 +485,7 @@ func (m *Message) validate(all bool) error {
 
 	var errors []error
 
-	if !_Message_From_Pattern.MatchString(m.GetFrom()) {
-		err := MessageValidationError{
-			field:  "From",
-			reason: "value does not match regex pattern \"^[a-zA-Z0-9]+$\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for From
 
 	// no validation rules for Text
 
@@ -575,8 +566,6 @@ var _ interface {
 	ErrorName() string
 } = MessageValidationError{}
 
-var _Message_From_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
-
 // Validate checks the field values on SendMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -612,16 +601,7 @@ func (m *SendMessageRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if !_SendMessageRequest_Text_Pattern.MatchString(m.GetText()) {
-		err := SendMessageRequestValidationError{
-			field:  "Text",
-			reason: "value does not match regex pattern \"^[a-zA-Z0-9]+$\"",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Text
 
 	if len(errors) > 0 {
 		return SendMessageRequestMultiError(errors)
@@ -704,8 +684,6 @@ var _ interface {
 } = SendMessageRequestValidationError{}
 
 var _SendMessageRequest_From_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
-
-var _SendMessageRequest_Text_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 // Validate checks the field values on GetUserChatsRequest with the rules
 // defined in the proto definition for this message. If any rules are

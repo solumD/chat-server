@@ -83,14 +83,14 @@ message ConnectChatRequest {
 }
 
 message Message {
-    string from = 1 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string from = 1;
     string text = 2;
 }
 
 message SendMessageRequest {
     int64 id = 1;
     string from = 2 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
-    string text = 3 [(validate.rules).string.pattern = "^[a-zA-Z0-9]+$"];
+    string text = 3;
 }
 
 message GetUserChatsRequest {
