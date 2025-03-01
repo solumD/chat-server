@@ -308,7 +308,9 @@ func (r *repo) getUserChatsIDs(ctx context.Context, userID int64) ([]int64, erro
 	chatIDs := []int64{}
 	for rows.Next() {
 		var id int64
-		rows.Scan(&id)
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
 		chatIDs = append(chatIDs, id)
 	}
 
@@ -340,7 +342,9 @@ func (r *repo) getChatUsersIDs(ctx context.Context, chatID int64) ([]int64, erro
 	userIDs := []int64{}
 	for rows.Next() {
 		var id int64
-		rows.Scan(&id)
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
 		userIDs = append(userIDs, id)
 	}
 

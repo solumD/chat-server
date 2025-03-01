@@ -64,6 +64,7 @@ func (i *API) DeleteChat(ctx context.Context, req *desc.DeleteChatRequest) (*emp
 	return &emptypb.Empty{}, nil
 }
 
+// GetUserChats возвращает список чатов юзера и информацию о них
 func (i *API) GetUserChats(ctx context.Context, req *desc.GetUserChatsRequest) (*desc.GetUserChatsResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("req is nil")
